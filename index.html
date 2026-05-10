@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Family Tree Locator - Maluku</title>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { margin: 0; display: flex; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; height: 100vh; background: #ecf0f1; }
+        
+        /* Sidebar Styling */
+        #sidebar { width: 320px; background: #2c3e50; color: white; padding: 25px; overflow-y: auto; z-index: 1000; box-shadow: 4px 0 10px rgba(0,0,0,0.3); }
+        h2 { color: #1abc9c; border-bottom: 2px solid #1abc9c; padding-bottom: 10px; margin-top: 0; }
+        
+        /* Map Styling */
+        #map { flex: 1; }
+
+        /* Card Styling */
+        .member-card { 
+            background: #34495e; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            transition: all 0.3s ease;
+            border-left: 1px solid #1abc9c;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        .member-card:hover { 
+            background: #1abc9c; 
+            transform: translateX(8px);
+        }
+        .member-card strong { display: block; font-size: 1.1em; }
+        .member-card small { color: #bdc3c7; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <h2>Daftar Keluarga</h2>
+        <div id="family-list">
+            </div>
+    </div>
+
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // A. Inisialisasi Peta (Fokus ke Ambon)
+        const map = L.map('map').setView([-3.654, 128.190], 13);
+
+        // B. Tambahkan Layer Peta
+        L.tileLayer('https://{s}.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+    maxZoom: 20,
+    subdomains:['mt0','mt1','mt2','mt3'],
+    attribution: '© Google Maps'
+}).addTo(map);
+
+        // C. Data Keluarga
+       const familyMembers = [
+    { 
+        id: 1, 
+        nama: "Keluarga Brian Watloly", 
+        peran: "Saya", 
+        lat: -3.715326, 
+        lng: 128.160103,
+        phone: "0812-481-50963",
+        alamat: "Jl. Dr. Kayadoe, Kudamati, Ambon",
+	Istri: "Febbry.Watloly/Hattu",
+	Anak2 : " Gavriel Watloly",
+	Anak : "Dalen Watloly",
+        info: "Gunung Nona Lorong TVRI",
+	foto: "rumah_brian.png"
+    },
+    { 
+        id: 2, 
+        nama: "Adik", 
+        peran: "Adik", 
+        lat: -3.6610, 
+        lng: 128.1850, 
+        phone: "0813-xxxx-xxxx", 
+        alamat: "Kawasan Benteng, Ambon",
+        info: "Di Sekolah" 
+    }
+];
+
+        // D. Tambahkan Garis Silsilah (Misal: Brian ke Adik)
+        const pointBrian = [-3.6545, 128.1905];
+        const pointAdik = [-3.6610, 128.1850];
+        L.polyline([pointBrian, pointAdik], {
+            color: '#1abc9c',
+            weight: 3,
+            dashArray: '10, 10',
+            opacity: 0.6
+        }).addTo(map).bindTooltip("Hubungan: Kakak-Adik");
+
+        // E. Render ke Sidebar dan Peta
+        const listContainer = document.getElementById('family-list');
+
+        familyMembers.forEach(member => {
+    // A. Marker di Peta dengan Popup yang lebih detail
+   const popupContent = `
+        <div style="font-family: Arial; width: 200px;">
+            <b style="font-size: 1.1em;">${member.nama}</b><br>
+            <span style="color: gray; font-size: 0.9em;">${member.info}</span>
+            <hr style="border: 0.5px solid #eee;">
+            <div style="margin-bottom: 8px;">
+                <b>No HP:</b> ${member.phone}<br>
+                <b>Alamat:</b> ${member.alamat}<br>
+		<b>Istri:</b> ${member.Istri}<br>
+		<b>Anak :</b> ${member.Anak}<br>
+		<b>Anak2 :</b> ${member.Anak2}<br>
+            </div>
+            <div style="text-align: center; margin-top: 10px;">
+                <img src="${member.foto}" alt="Foto Rumah" 
+                     style="width: 100%; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.2);">
+            </div>
+        </div>
+    `;
+
+    const marker = L.marker([member.lat, member.lng]).addTo(map)
+        .bindPopup(popupContent);
+
+    // B. Card di Sidebar dengan tombol panggil (Opsional)
+    const card = document.createElement('div');
+    card.className = 'member-card';
+    card.innerHTML = `
+        <strong>${member.nama} (${member.peran})</strong>
+        <small>${member.alamat}</small>
+        <div style="margin-top: 5px; color: #1abc9c; font-weight: bold;">
+            📞 ${member.phone}
+        </div>
+    `;
+
+    card.onclick = () => {
+        map.flyTo([member.lat, member.lng], 17); // Zoom lebih dekat (17)
+        marker.openPopup();
+    };
+
+    listContainer.appendChild(card);
+});
+    </script>
+</body>
+</html>
